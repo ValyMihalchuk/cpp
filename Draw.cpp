@@ -3,15 +3,15 @@
 #include "lab2.h"
 using namespace std;
 
-col Draw::GetTypeOfCollision(RECT rcClient) {
+col Draw::GetTypeOfCollision(RECT &rcClient) {
 
-	if (point.x + H + dir.GetPoint().x > rcClient.right)
+	if (point.getX() + H + dir.getX()> rcClient.right)
 		return right_col;
-	else if (point.x + dir.GetPoint().x < rcClient.left)
+	else if (point.getX()+ dir.getX() < rcClient.left)
 		return left_col;
-	else if (point.y - H + dir.GetPoint().y < rcClient.top)
+	else if (point.getY() - H + dir.getY()< rcClient.top)
 		return down_col;
-	else if (point.y + dir.GetPoint().y > rcClient.bottom)
+	else if (point.getY() + dir.getY() > rcClient.bottom)
 		return top_col;
 	else
 		return no_col;
@@ -19,47 +19,44 @@ col Draw::GetTypeOfCollision(RECT rcClient) {
 
 
 
-void Draw::AppendToDir(POINT new_dir) {
-	Vector temp;
-	temp.setPoint(new_dir);
-	dir += temp;
-}
-
-void Draw::ToHandleCollision(RECT rcClient, Vector &new_dir) {
+void Draw::ToHandleCollision(RECT &rcClient, Vector &new_dir) {
 
 	switch (GetTypeOfCollision(rcClient)) {
 
 	case right_col:
-		dir.setX(-dir.GetPoint().x);
+		dir.setX(-dir.getX());
 		break;
 
 	case left_col:
-		dir.setX(-dir.GetPoint().x);
+		dir.setX(-dir.getY());
 		break;
 
 	case top_col:
-		dir.setY(-dir.GetPoint().y);
+		dir.setY(-dir.getY());
 		break;
 
 	case down_col:
-		dir.setY(-dir.GetPoint().y);
+		dir.setY(-dir.getY());
 		break;
 
 	case no_col:
-		point.x += dir.GetPoint().x;
-		point.y += dir.GetPoint().y;
+		point += dir;
 		break;
 	}
 }
 
 void Draw::Init() {
-	point.x = H;
-	point.y = 2*H;
+	point.setX(H);
+	point.setY(2*H);
+	LEFT.setX(-1);
+	RIGHT.setX(1);
+	UP.setY(-1);
+	DOWN.setY(1);
 }
 
-void Draw::DoDraw(HDC hdc) {
+void Draw::DoDraw(HDC &hdc) {
 
-	static list <POINT> prev;
+	static list <Vector> prev;
 	static HBRUSH hBrush, old_brush;
 	static int current = 0;
 	int R = 0, G = 0, B = 255;
@@ -70,11 +67,11 @@ void Draw::DoDraw(HDC hdc) {
 	}
 	prev.push_front(point);
 	current++;
-	list <POINT> ::iterator it;
+	list <Vector> ::iterator it;
 	for (it = prev.begin(); it != prev.end(); it++) {
 		hBrush = CreateSolidBrush(RGB(R, G, B));
 		SelectObject(hdc, hBrush);
-		Rectangle(hdc, (*it).x, (*it).y, (*it).x + H, (*it).y - H);
+		Rectangle(hdc, (*it).getX(), (*it).getY(), (*it).getX() + H, (*it).getY() - H);
 		DeleteObject(hBrush);
 		R += 20;
 		G += 20;
